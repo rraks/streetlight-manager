@@ -1,0 +1,7 @@
+{
+  "confirmed": true,
+  "data": "data",
+  "devEUI": "id",
+  "fPort": "port",
+  "reference": "string"
+}
