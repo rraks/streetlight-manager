@@ -57,11 +57,11 @@ grpc = {}
 nsSubTopic = "application/1/node/"
 # Default Network Server Params
 nsSubParams = {}
-nsSubParams["url"] = ""
+nsSubParams["url"] = "127.0.0.1"
 nsSubParams["port"] = 1883
 nsSubParams["timeout"] = 60
-nsSubParams["username"] = ""
-nsSubParams["password"] = ""
+nsSubParams["username"] = "uname"
+nsSubParams["password"] = "password"
 
 tsDBUrl = "127.0.0.1"
 tsDBPort = 8086
@@ -220,7 +220,9 @@ class Application:
                 devId = topic[3] #{id} is the 4th field
                 print('Received ', devId, ' from NS')
                 if devId in self.lights:
-                    decodedData = base64.b64decode(json.loads(msg.payload)["data"])
+                    print(msg.payload)
+                    decodedData = base64.b64decode(json.loads(msg.payload.decode("utf-8"))["data"])
+                    #decodedData = base64.b64decode(json.loads(msg.payload"))["data"])
                     sensors.ParseFromString(decodedData)
                     print(sensors)
                     self.lights[devId]["currTemp"] = sensors.caseTemperature
@@ -317,7 +319,7 @@ def server():
         if "newLight" in action:
             if msgJson["AppName"] in appDict:
                 appDict[msgJson["AppName"]].addLights(msgJson["Lights"])
-        if "addPolicy" in action:
+        if "appendPolicy" in action:
             if msgJson["AppName"] in appDict:
                 appDict[msgJson["AppName"]].addPolicy(msgJson["Policy"], msgJson["PolicyParams"])
 
