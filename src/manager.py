@@ -18,7 +18,7 @@ import base64
 import time
 from MQTTPubSub import MQTTPubSub
 from influxdb import InfluxDBClient
-
+import random
 
 #Proto Info
 protosDir = "./protos/"
@@ -67,6 +67,8 @@ tsDBUrl = "127.0.0.1"
 tsDBPort = 8086
 tsDBUname = "root"
 tsDBPwd = "root"
+
+
 
 # Proto Classes
 configuration = actuated_pb2.targetConfigurations()
@@ -174,7 +176,7 @@ class Application:
             self.lights[light]["isActive"] = False 
 
         self.nsSubParams["topic"] = []
-        self.nsSubParams["topic"] = nsSubTopic+"+/rx"
+        self.nsSubParams["topic"] =nsSubTopic
         self.nsSubParams["onMessage"] = self.NSSub_onMessage
         self.nsSubParams["onConnect"] = self.NSSub_onConnect
         self.nsSub = MQTTPubSub(nsSubParams)
@@ -218,8 +220,9 @@ class Application:
             try:
                 topic = msg.topic.split('/')
                 devId = topic[3] #{id} is the 4th field
+                msgType = topic[5]
                 print('Received ', devId, ' from NS')
-                if devId in self.lights:
+                if devId in self.lights and "rx" in msgType:
                     print(msg.payload)
                     decodedData = base64.b64decode(json.loads(msg.payload.decode("utf-8"))["data"])
                     #decodedData = base64.b64decode(json.loads(msg.payload"))["data"])
@@ -272,6 +275,13 @@ class Application:
 
                     print(series)
                     self.influxClient.write_points(series, time_precision='n')
+
+                # For lights that had their policy reset
+
+                if devId in self.lights and "join" in msgType:
+                    time.sleep(random.randint(0,9,1))
+                    self.setBrightness(self.currBrightness,devId)
+
 
             except Exception as e:
                 print("Couldn't save", topic)

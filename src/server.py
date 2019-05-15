@@ -32,6 +32,7 @@ import sys
 from shutil import copyfile
 import zmq
 from pymongo import MongoClient
+import pdb
 
 client = MongoClient('localhost', 27017)
 db = client.streetlightsDB
@@ -42,6 +43,8 @@ api = Api(app)
 
 workingDir = sys.path[0]
 items = {}
+
+pdb.set_trace()
 
 context = zmq.Context()
 print("Connecting to socket with ports %s" % 4725)
